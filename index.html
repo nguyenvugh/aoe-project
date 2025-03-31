@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tạo đội chơi cân bằng</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f4f7fa;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+      }
+      h3 {
+        color: #34495e;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+      .add-player,
+      .player-list,
+      .teams {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 20px 0;
+      }
+      .add-player input[type="text"],
+      .add-player input[type="number"] {
+        padding: 8px;
+        margin: 0 10px 0 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 150px;
+      }
+      .player-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin: 5px 0;
+        background: #f9f9f9;
+        border-radius: 5px;
+        transition: background 0.3s;
+      }
+      .player-item:hover {
+        background: #e9ecef;
+      }
+      .player-item input[type="text"],
+      .player-item input[type="number"] {
+        padding: 5px;
+        margin: 0 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 120px;
+      }
+      .player-item input[type="number"] {
+        width: 60px;
+      }
+      button {
+        padding: 8px 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        background-color: #3498db;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      .add-player button {
+        background-color: #2ecc71;
+      }
+      .add-player button:hover {
+        background-color: #27ae60;
+      }
+      .teams h4 {
+        color: #e74c3c;
+        margin: 15px 0 5px;
+      }
+      .teams p {
+        margin: 5px 0;
+        padding-left: 15px;
+      }
+      .error {
+        color: #e74c3c;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      #generateTeamsBtn {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 30px;
+        font-size: 16px;
+        background-color: #e67e22;
+      }
+      #generateTeamsBtn:hover {
+        background-color: #d35400;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tạo đội chơi cân bằng</h1>
+
+    <!-- Form thêm player -->
+    <div class="add-player">
+      <h3>Thêm người chơi</h3>
+      <input type="text" id="playerName" placeholder="Tên người chơi" />
+      <input
+        type="number"
+        id="playerScore"
+        min="0"
+        max="100"
+        placeholder="Điểm (0-100)"
+      />
+      <button onclick="addPlayer()">Thêm</button>
+    </div>
+
+    <!-- Danh sách player -->
+    <div class="player-list">
+      <h3>Danh sách người chơi</h3>
+      <div id="playersContainer"></div>
+    </div>
+
+    <!-- Nút tạo đội -->
+    <button id="generateTeamsBtn" onclick="generateTeams()">Tạo đội</button>
+
+    <!-- Kết quả -->
+    <div class="teams">
+      <h3>Kết quả</h3>
+      <div id="teamResult"></div>
+      <div id="errorMessage" class="error"></div>
+    </div>
+
+    <script>
+      // Danh sách player mặc định
+      let players = [
+        { name: "Thuyên", score: 50 },
+        { name: "Luân", score: 75 },
+        { name: "Thành", score: 70 },
+        { name: "Tân", score: 65 },
+        { name: "Hưởng", score: 66 },
+        { name: "Vũ", score: 65 },
+        { name: "Mario", score: 66 },
+        { name: "Tâm", score: 80 },
+        { name: "Khánh", score: 75 },
+        { name: "Thái", score: 66 },
+        { name: "Cà", score: 62 },
+        { name: "Duy", score: 40 },
+        { name: "Minh", score: 20 },
+      ];
+
+      // Cập nhật danh sách player khi load trang
+      window.onload = updatePlayerList;
+
+      // Thêm player
+      function addPlayer() {
+        const name = document.getElementById("playerName").value;
+        const score = parseInt(document.getElementById("playerScore").value);
+
+        if (name && score >= 0 && score <= 100) {
+          players.push({ name, score });
+          document.getElementById("playerName").value = "";
+          document.getElementById("playerScore").value = "";
+          updatePlayerList();
+        }
+      }
+
+      // Chỉnh sửa player
+      function editPlayer(index) {
+        const newName = document.getElementById(`name${index}`).value;
+        const newScore = parseInt(
+          document.getElementById(`score${index}`).value
+        );
+        if (newName && newScore >= 0 && newScore <= 100) {
+          players[index] = { name: newName, score: newScore };
+          updatePlayerList();
+        }
+      }
+
+      // Cập nhật danh sách player
+      function updatePlayerList() {
+        const container = document.getElementById("playersContainer");
+        container.innerHTML = "";
+        players.forEach((player, index) => {
+          container.innerHTML += `
+                    <div class="player-item">
+                        <input type="checkbox" id="player${index}" value="${index}">
+                        <input type="text" id="name${index}" value="${player.name}">
+                        <input type="number" id="score${index}" min="0" max="100" value="${player.score}">
+                        <button onclick="editPlayer(${index})">Cập nhật</button>
+                    </div>
+                `;
+        });
+      }
+
+      // Tạo đội với chênh lệch tối thiểu, ngẫu nhiên mỗi lần
+      function generateTeams() {
+        const errorDiv = document.getElementById("errorMessage");
+        const resultDiv = document.getElementById("teamResult");
+        errorDiv.innerHTML = "";
+        resultDiv.innerHTML = "";
+
+        // Lấy danh sách player được chọn
+        const selectedPlayers = [];
+        document
+          .querySelectorAll('input[type="checkbox"]:checked')
+          .forEach((checkbox) => {
+            const index = parseInt(checkbox.value);
+            selectedPlayers.push(players[index]);
+          });
+
+        // Kiểm tra số lượng player là số chẵn
+        if (selectedPlayers.length % 2 !== 0) {
+          errorDiv.innerHTML = "Vui lòng chọn số lượng người chơi là số chẵn!";
+          return;
+        }
+
+        if (selectedPlayers.length < 2) {
+          errorDiv.innerHTML = "Vui lòng chọn ít nhất 2 người chơi!";
+          return;
+        }
+
+        // Xáo trộn danh sách player ngẫu nhiên
+        const shuffledPlayers = [...selectedPlayers].sort(
+          () => Math.random() - 0.5
+        );
+        const teamSize = shuffledPlayers.length / 2;
+        let bestTeam1 = [];
+        let bestTeam2 = [];
+        let minDifference = Infinity;
+
+        // Lấy một số tổ hợp ngẫu nhiên thay vì tất cả
+        const maxAttempts = Math.min(100, 1 << teamSize);
+        for (let i = 0; i < maxAttempts; i++) {
+          const attemptPlayers = [...shuffledPlayers].sort(
+            () => Math.random() - 0.5
+          );
+          const team1 = attemptPlayers.slice(0, teamSize);
+          const team2 = attemptPlayers.slice(teamSize);
+
+          const team1Score = team1.reduce((sum, p) => sum + p.score, 0);
+          const team2Score = team2.reduce((sum, p) => sum + p.score, 0);
+          const difference = Math.abs(team1Score - team2Score);
+
+          if (difference < minDifference) {
+            minDifference = difference;
+            bestTeam1 = team1;
+            bestTeam2 = team2;
+          }
+        }
+
+        // Tính tổng điểm và phần trăm
+        const team1Score = bestTeam1.reduce((sum, p) => sum + p.score, 0);
+        const team2Score = bestTeam2.reduce((sum, p) => sum + p.score, 0);
+        const totalScore = team1Score + team2Score;
+        const team1Percent = Math.round((team1Score / totalScore) * 100);
+        const team2Percent = 100 - team1Percent;
+
+        // Hiển thị kết quả
+        resultDiv.innerHTML = `
+                <h4>Team 1 (${team1Percent}%):</h4>
+                ${bestTeam1
+                  .map((p) => `<p>${p.name} - ${p.score} điểm</p>`)
+                  .join("")}
+                <h4>Team 2 (${team2Percent}%):</h4>
+                ${bestTeam2
+                  .map((p) => `<p>${p.name} - ${p.score} điểm</p>`)
+                  .join("")}
+                <p>Chênh lệch: ${Math.abs(team1Percent - team2Percent)}%</p>
+            `;
+      }
+    </script>
+  </body>
+</html>
