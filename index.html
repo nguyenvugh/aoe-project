@@ -267,11 +267,11 @@
 
         // Hiển thị kết quả
         resultDiv.innerHTML = `
-                <h4>Team 1 (${team1Percent}%):</h4>
+                <h4>Team 1 (${team1Percent}%): ${team1Score}</h4>
                 ${bestTeam1
                   .map((p) => `<p>${p.name} - ${p.score} điểm</p>`)
                   .join("")}
-                <h4>Team 2 (${team2Percent}%):</h4>
+                <h4>Team 2 (${team2Percent}%): ${team2Score}</h4>
                 ${bestTeam2
                   .map((p) => `<p>${p.name} - ${p.score} điểm</p>`)
                   .join("")}
